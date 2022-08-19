@@ -17,6 +17,7 @@
 #define REG_DATA_Z_LSB 0x36
 #define REG_DATA_Z_MSB 0x37
 int  x_out, y_out, z_out;
+int  x0,x1,y01,y00,z1,z0;
 float xg,yg,zg;
 int x_error,y_error,z_error;
 int x_offset, y_offset, z_offset;
@@ -42,6 +43,8 @@ int main()
 	y_out=wiringPiI2CReadReg16(fd, REG_DATA_Y_LSB);
 //	y_out=y_out/256;
 	z_out=wiringPiI2CReadReg16(fd, REG_DATA_Z_LSB);
+//	printf("Reg x=%d\ty=%d\tz=%d\n",x_out,y_out,z_out);
+	
 //	z_out=z_out/256;
 	
 	//calculating offset
@@ -59,9 +62,21 @@ int main()
 	delay(10);
 	while(1)
 	{
-		x_out=wiringPiI2CReadReg16(fd, REG_DATA_X_LSB);
-		y_out=wiringPiI2CReadReg16(fd, REG_DATA_Y_LSB);
-		z_out=wiringPiI2CReadReg16(fd, REG_DATA_Z_LSB);
+	//	x_out=wiringPiI2CReadReg16(fd, REG_DATA_X_LSB);
+	//	y_out=wiringPiI2CReadReg16(fd, REG_DATA_Y_LSB);
+	//	z_out=wiringPiI2CReadReg16(fd, REG_DATA_Z_LSB);
+		x0=wiringPiI2CReadReg8(fd,REG_DATA_X_LSB);
+		x1=wiringPiI2CReadReg8(fd,REG_DATA_X_MSB);
+		y00=wiringPiI2CReadReg8(fd,REG_DATA_Y_LSB);
+		y01=wiringPiI2CReadReg8(fd,REG_DATA_Y_MSB);
+		z0=wiringPiI2CReadReg8(fd,REG_DATA_Z_LSB);
+		z1=wiringPiI2CReadReg8(fd,REG_DATA_Z_MSB);
+		printf("x0=%d\tx1=%d\n",x0, x1);
+		printf("y0=%d\ty1=%d\n",y00, y01);
+		printf("z0=%d\tz1=%d\n",z0, z1);
+		x_out=x1<<8 | x0;
+		y_out=y01<<8 | y00;
+		z_out=z1<<8 | z0;
 	   	 x_out=x_out/256;
 		xg=x_out*0.0039;
 		xg=xg*9.81;
@@ -77,9 +92,10 @@ int main()
 		zg=zg*9.81;
 //		z_out=-(~(int16_t)z_out +1);
 //	z_out=z_out-z_offset;
+	//	printf("Reg x=%d\ty=%d\tz=%d\n",x_out,y_out,z_out);
 		
 		printf("x=%f\ty=%f\tz=%f\n",xg,yg,zg);
-		delay(300);
+		delay(1000);
 /*		roll=atan(y_out/sqrt(pow(x_out,2)+pow(z_out,2)))*180.0/PI;
 		pitch=atan(x_out/sqrt(pow(y_out,2)+pow(z_out,2)))*180.0/PI;
 		printf("roll=%f\tpitch=%f\n",roll, pitch);*/
